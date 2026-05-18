@@ -1,12 +1,12 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.db.session import get_session
 from app.models.post import Post
-from app.schemas.post import PostCreate, PostRead
+from app.schemas.post import PostCreate, PostRead, PostUpdate
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -22,3 +22,5 @@ async def create_post(data: PostCreate, session: AsyncSession = Depends(get_sess
     await session.commit()
     await session.refresh(post)
     return post
+
+@router.

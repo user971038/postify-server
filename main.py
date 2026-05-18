@@ -16,8 +16,6 @@ app.add_middleware(
     allow_origins=['http://localhost:5173']
 )
 
-#this is a comment
-
 app.include_router(users.router)
 app.include_router(posts.router)
 

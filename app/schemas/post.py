@@ -1,5 +1,6 @@
 from datetime import datetime  
 import uuid
+from typing import Optional
 
 from sqlmodel import SQLModel
 
@@ -12,3 +13,6 @@ class PostRead(SQLModel):
     user_id: uuid.UUID
     description: str
     created_at: datetime
+
+class PostUpdate(SQLModel):
+    description: Optional[str] = None
