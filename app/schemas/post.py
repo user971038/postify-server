@@ -18,3 +18,6 @@ class PostRead(SQLModel):
 
 class PostUpdate(SQLModel):
     description: Optional[str] = None
+
+class PostDeleteResponse(SQLModel):
+    id: uuid.UUID
