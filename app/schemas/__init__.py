@@ -1,4 +1,17 @@
-from app.models.user import User
-from app.models.post import Post
+from sqlmodel import SQLModel
+from datetime import datetime
+import uuid
 
-__all__ = ["User", "Post"]
+class UserCreate(SQLModel):
+    username: str
+    name: str
+    lastname: str
+    email: str
+    password: str
+
+class UserRead(SQLModel):
+    username: str
+    name: str
+    lastname: str
+    email: str
+    created_at: datetime

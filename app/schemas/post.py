@@ -14,5 +14,7 @@ class PostRead(SQLModel):
     description: str
     created_at: datetime
 
+# Update and Delete
+
 class PostUpdate(SQLModel):
     description: Optional[str] = None

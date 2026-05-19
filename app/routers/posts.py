@@ -23,4 +23,6 @@ async def create_post(data: PostCreate, session: AsyncSession = Depends(get_sess
     await session.refresh(post)
     return post
 
-@router.
+# Update and Delete
+
+# @router. y pues ajá
