@@ -4,6 +4,9 @@ from typing import Optional
 
 from sqlmodel import SQLModel
 
+from .like import LikeRead
+from .comment import CommentRead
+
 class PostCreate(SQLModel):
     description: str
     user_id: uuid.UUID
@@ -21,3 +24,9 @@ class PostUpdate(SQLModel):
 
 class PostDeleteResponse(SQLModel):
     id: uuid.UUID
+
+# Details
+
+class PostReadDetails(PostRead):
+    likes: list[LikeRead] = []
+    comments: list[CommentRead] = []

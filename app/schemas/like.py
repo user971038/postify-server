@@ -3,7 +3,6 @@ import uuid
 
 from sqlmodel import SQLModel
 
-
 class LikeCreate(SQLModel):
     user_id: uuid.UUID
     post_id: uuid.UUID
