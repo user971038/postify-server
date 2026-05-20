@@ -4,8 +4,9 @@ from typing import Optional
 
 from sqlmodel import SQLModel
 
-from .like import LikeRead
-from .comment import CommentRead
+from app.schemas.like import LikeRead
+from app.schemas.comment import CommentRead
+from app.schemas.image import ImageRead
 
 class PostCreate(SQLModel):
     description: str
@@ -16,6 +17,9 @@ class PostRead(SQLModel):
     user_id: uuid.UUID
     description: str
     created_at: datetime
+    images: list["ImageRead"] = []
+    likes_count: int = 0
+    comments_count: int = 0
 
 # Update and Delete
 
@@ -28,5 +32,10 @@ class PostDeleteResponse(SQLModel):
 # Details
 
 class PostReadDetails(PostRead):
-    likes: list[LikeRead] = []
-    comments: list[CommentRead] = []
+    id: uuid
+    user_id: uuid.UUID
+    description: str
+    created_at: datetime
+    images: list["ImageRead"] = []
+    likes: list["LikeRead"] = []
+    comments: list["CommentRead"] = []

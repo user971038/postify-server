@@ -23,8 +23,13 @@ async def get_posts(session: AsyncSession = Depends(get_session)):
     return result.scalars().all()
 
 @router.post('/', response_model=PostRead, status_code=201)
-async def create_post(data: PostCreate, session: AsyncSession = Depends(get_session)):
-    post = Post(**data.model_dump())
+async def create_post(
+    user_id: str = Form(...),
+    description: str = Form(...),
+    files: List[UploadFile] = File(default=[]),
+    session: AsyncSession = Depends(get_session)
+    ):
+    post = Post(description=description, user_id=user_id)
     session.add(post)
     await session.commit()
     await session.refresh(post)
