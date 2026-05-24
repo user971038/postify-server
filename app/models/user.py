@@ -1,4 +1,4 @@
-from datetime import datetime  # Import the class directly
+from datetime import datetime
 from typing import List
 import uuid
 
@@ -16,6 +16,6 @@ class User(SQLModel, table=True):
     password: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    posts: List["Post"] = Relationship(back_populates="user")
-    likes: List["Like"] = Relationship(back_populates="user")
+    posts: List['Post'] = Relationship(back_populates="user")
+    likes: List['Like'] = Relationship(back_populates="user")
     comments: List['Comment'] = Relationship(back_populates="user")

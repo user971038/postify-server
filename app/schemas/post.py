@@ -4,9 +4,11 @@ from typing import Optional
 
 from sqlmodel import SQLModel
 
-from app.schemas.like import LikeRead
-from app.schemas.comment import CommentRead
-from app.schemas.image import ImageRead
+if TYPE_CHECKING:
+    from app.schemas.like import LikeRead
+    from app.schemas.comment import CommentRead
+    from app.schemas.image import ImageRead
+
 
 class PostCreate(SQLModel):
     description: str
@@ -17,7 +19,7 @@ class PostRead(SQLModel):
     user_id: uuid.UUID
     description: str
     created_at: datetime
-    images: list["ImageRead"] = []
+    images: List['ImageRead'] = []
     likes_count: int = 0
     comments_count: int = 0
 
@@ -36,6 +38,14 @@ class PostReadDetails(PostRead): # tmb me da error
     user_id: uuid.UUID
     description: str
     created_at: datetime
-    images: list["ImageRead"] = []
-    likes: list["LikeRead"] = []
-    comments: list["CommentRead"] = []
+    images: List['ImageRead'] = []
+    likes: List['LikeRead'] = []
+    comments: List['CommentRead'] = []
+
+from app.schemas.like import LikeRead
+from app.schemas.comment import CommentRead
+from app.schemas.image import ImageRead
+
+
+PostReadDetails.model_rebuild()
+PostRead.model_rebuild()

@@ -3,7 +3,7 @@ import cloudinary
 import cloudinary.uploader
 
 from fastapi import UploadFile, HTTPException
-from fastapi.concurrency import run_in_threadpool
+#from fastapi.concurrency import run_in_threadpool
 
 class CloudinaryService:
     def __init__(self):
@@ -32,7 +32,7 @@ class CloudinaryService:
         except Exception as e:
             raise HTTPException(
                 status_code=500,
-                details=f"Error uploading: {str(e)}"
+                detail=f"Error uploading: {str(e)}"
             )
 
 cloudinary_service = CloudinaryService()

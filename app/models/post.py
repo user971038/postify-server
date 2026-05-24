@@ -14,5 +14,5 @@ class Post(SQLModel, table=True):
     
     user: "User" = Relationship(back_populates="posts")
     images: List['Image'] = Relationship(back_populates="post")
-    likes: List["Like"] = Relationship(back_populates="post")
+    likes: List['Like'] = Relationship(back_populates="post")
     comments: List['Comment'] = Relationship(back_populates="post")

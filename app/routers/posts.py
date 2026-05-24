@@ -8,25 +8,49 @@ from sqlmodel import select
 from app.db.session import get_session
 
 from app.models.comment import Comment
+from app.models.image import Image
 from app.models.like import Like
 from app.models.post import Post
 
 from app.schemas.comment import CommentCreate, CommentRead
+from app.schemas.image import ImageRead
 from app.schemas.like import LikeCreate, LikeRead
-from app.schemas.post import PostRead, PostReadDetails
-
-#from app.schemas.post import PostCreate, PostRead, PostReadDetails
+from app.schemas.post import PostCreate, PostRead, PostReadDetails
 
 from app.services.cloudinary_service import cloudinary_service
-
-#PostUpdate
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
 @router.get('/', response_model=List[PostRead])
 async def get_posts(session: AsyncSession = Depends(get_session)):
     result = await session.execute(select(Post))
-    return result.scalars().all()
+    posts =  result.scalars().all()
+    
+    post_with_data = []
+    
+    for post in posts:
+        image_result = await session.execute(select(Image).where(Image.post_id == post.id))
+        images = image_result.scalars().all()
+        
+        like_result = await session.execute(select(Like).where(Like.post_id == post.id))
+        likes = like_result.scalars().all()
+        
+        comments_result = await session.execute(select(Comment).where(Comment.post_id == post.id))
+        comments = comments_result.scalars().all()      
+        
+    
+        post_with_data.append(
+            PostRead(
+                id=post.id,
+                user_id=post.user_id,
+                description=post.description,
+                created_at=post.created_at,
+                images=[ImageRead(**img.model_dump()) for img in images ],
+                likes=[LikeRead(**like.model_dump()) for like in likes],
+                comments=[CommentRead(**comment.model_dump()) for comment in comments]
+            )
+        )
+    return post_with_data
 
 @router.post('/', response_model=PostRead, status_code=201)
 async def create_post(
@@ -46,7 +70,7 @@ async def create_post(
         for file in files:
             cloud_res = cloudinary_service.upload_image(
                 file,
-                folder=["postify/posts/(post.id)"]
+                folder=f'postify/posts/{post.id}'
             )
             image = Image(
                 url=cloud_res["url"],
@@ -62,14 +86,13 @@ async def create_post(
         id=post.id,
         user_id=post.user_id,
         description=post.description,
+        images=[ImageRead(**img.model_dump()) for img in images],
         created_at=post.created_at,
         likes_count=0,
         comments_count=0
     )
 
 # Update and Delete
-
-# @router. y pues ajá
 
 # NEW ---------------------------------------------------------------------------------
 
@@ -86,12 +109,16 @@ async def get_post_by_id(post_id: uuid.UUID,  session: AsyncSession = Depends(ge
     
     comments_result = await session.execute(select(Comment).where(Comment.post_id == post_id))
     comments = comments_result.scalars().all()
+
+    image_result = await session.execute(select(Image).where(Image.post_id == post_id))
+    images = image_result.scalars().all()
     
     return PostReadDetails(
         id=post_id,
         user_id=post.user_id,
         description=post.description,
         created_at=post.created_at,
+        images=[ImageRead(**img.model_dump()) for img in images],
         likes=[LikeRead(**like.model_dump()) for like in likes],
         comments=[CommentRead(**comment.model_dump()) for comment in comments]
     )
