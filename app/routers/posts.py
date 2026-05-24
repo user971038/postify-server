@@ -21,6 +21,8 @@ from app.services.cloudinary_service import cloudinary_service
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
+# PostRead - get_posts
+
 @router.get('/', response_model=List[PostRead])
 async def get_posts(session: AsyncSession = Depends(get_session)):
     result = await session.execute(select(Post))
@@ -46,15 +48,21 @@ async def get_posts(session: AsyncSession = Depends(get_session)):
                 description=post.description,
                 created_at=post.created_at,
                 images=[ImageRead(**img.model_dump()) for img in images ],
-                likes=[LikeRead(**like.model_dump()) for like in likes],
-                comments=[CommentRead(**comment.model_dump()) for comment in comments]
+                #likes=[LikeRead(**like.model_dump()) for like in likes],
+                #comments=[CommentRead(**comment.model_dump()) for comment in comments]
+                #checar cómo está todo declarado en schemas/post.py
+                likes_count=len(likes),
+                comments_count=len(comments)
             )
         )
     return post_with_data
 
+# PostRead - create_post
+
 @router.post('/', response_model=PostRead, status_code=201)
 async def create_post(
-    user_id: str = Form(...),
+    #user_id: str = Form(...),
+    user_id: uuid.UUID = Form(...),
     description: str = Form(...),
     files: List[UploadFile] = File(default=[]),
     session: AsyncSession = Depends(get_session)
@@ -96,6 +104,8 @@ async def create_post(
 
 # NEW ---------------------------------------------------------------------------------
 
+# PostReadDetails - get_post_by_id
+
 @router.get('/{post_id}', response_model=PostReadDetails)
 async def get_post_by_id(post_id: uuid.UUID,  session: AsyncSession = Depends(get_session)): 
     result = await session.execute(select(Post).where(Post.id == post_id))
@@ -123,6 +133,7 @@ async def get_post_by_id(post_id: uuid.UUID,  session: AsyncSession = Depends(ge
         comments=[CommentRead(**comment.model_dump()) for comment in comments]
     )
 
+# LikeRead - add_like
 
 @router.post('/{post_id}/likes', response_model=LikeRead, status_code=201)
 async def add_like(post_id: uuid.UUID, data: LikeCreate,  session: AsyncSession = Depends(get_session)):
@@ -146,7 +157,8 @@ async def add_like(post_id: uuid.UUID, data: LikeCreate,  session: AsyncSession 
     
     return LikeRead(**like.model_dump())
         
-        
+# CommentRead
+
 @router.post('/{post_id}/comments', response_model=CommentRead, status_code=201)
 async def add_comment(post_id: uuid.UUID, data:CommentCreate,  session: AsyncSession = Depends(get_session)): 
     result = await session.execute(select(Post).where(Post.id == post_id))
@@ -155,7 +167,8 @@ async def add_comment(post_id: uuid.UUID, data:CommentCreate,  session: AsyncSes
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    comment = Comment(**data.model_dump())
+    #comment = Comment(**data.model_dump())
+    comment = Comment(**data.model_dump(), post_id=post_id)
     session.add(comment)
     await session.commit()
     await session.refresh(comment)
