@@ -89,7 +89,7 @@ async def create_post(
             if isinstance(file, str) or not hasattr(file, "filename") or not file.filename:
                 continue
                 
-            cloud_res = cloudinary_service.upload_image(
+            cloud_res = await cloudinary_service.upload_image(
                 file,
                 folder=f'postify/posts/{post.id}'
             )
@@ -103,7 +103,7 @@ async def create_post(
             session.add(image)
             images.append(image)
 
-        await session.commit()
+    await session.commit()
 
     return PostRead(
         id=post.id,
