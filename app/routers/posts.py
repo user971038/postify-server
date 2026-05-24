@@ -6,12 +6,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.db.session import get_session
+
 from app.models.comment import Comment
 from app.models.like import Like
 from app.models.post import Post
+
 from app.schemas.comment import CommentCreate, CommentRead
 from app.schemas.like import LikeCreate, LikeRead
-from app.schemas.post import PostCreate, PostRead, PostReadDetails
+from app.schemas.post import PostRead, PostReadDetails
+
+#from app.schemas.post import PostCreate, PostRead, PostReadDetails
+
+from app.services.cloudinary_service import cloudinary_service
 
 #PostUpdate
 
@@ -29,11 +35,37 @@ async def create_post(
     files: List[UploadFile] = File(default=[]),
     session: AsyncSession = Depends(get_session)
     ):
+    
     post = Post(description=description, user_id=user_id)
     session.add(post)
     await session.commit()
     await session.refresh(post)
-    return post
+
+    images = []
+    if files and files[0].filename:
+        for file in files:
+            cloud_res = cloudinary_service.upload_image(
+                file,
+                folder=["postify/posts/(post.id)"]
+            )
+            image = Image(
+                url=cloud_res["url"],
+                public_id=cloud_res["public_id"],
+                post_id=post.id
+            )
+
+            session.add(image)
+            images.append(image)
+    await session.commit()
+
+    return PostRead(
+        id=post.id,
+        user_id=post.user_id,
+        description=post.description,
+        created_at=post.created_at,
+        likes_count=0,
+        comments_count=0
+    )
 
 # Update and Delete
 

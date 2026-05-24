@@ -23,16 +23,16 @@ class PostRead(SQLModel):
 
 # Update and Delete
 
-class PostUpdate(SQLModel):
-    description: Optional[str] = None
+#class PostUpdate(SQLModel):
+    #description: Optional[str] = None
 
-class PostDeleteResponse(SQLModel):
-    id: uuid.UUID
+#class PostDeleteResponse(SQLModel):
+    #id: uuid.UUID
 
 # Details
 
-class PostReadDetails(PostRead):
-    id: uuid
+class PostReadDetails(PostRead): # tmb me da error
+    id: uuid.UUID
     user_id: uuid.UUID
     description: str
     created_at: datetime
