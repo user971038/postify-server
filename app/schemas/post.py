@@ -25,11 +25,12 @@ class PostRead(SQLModel):
 
 # Update and Delete
 
-#class PostUpdate(SQLModel):
-    #description: Optional[str] = None
+class PostUpdate(SQLModel):
+    description: Optional[str] = None
 
-#class PostDeleteResponse(SQLModel):
-    #id: uuid.UUID
+class PostDelete(SQLModel):
+    id: uuid.UUID
+    message: str = "Publicación eliminada exitosamente"
 
 # Details
 
