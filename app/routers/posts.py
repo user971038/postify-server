@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, Any
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status, Form, File, UploadFile
@@ -64,7 +64,8 @@ async def create_post(
     #user_id: str = Form(...),
     user_id: uuid.UUID = Form(...),
     description: str = Form(...),
-    files: List[UploadFile] = File(default=[]),
+    #files: Optional[List[UploadFile]] = File(default=None),
+    files: Optional[List[Any]] = File(default=None),
     session: AsyncSession = Depends(get_session)
     ):
     
@@ -74,12 +75,25 @@ async def create_post(
     await session.refresh(post)
 
     images = []
-    if files and files[0].filename:
+
+    #if files and files[0].filename:
+        #for file in files:
+            #cloud_res = cloudinary_service.upload_image(
+                #file,
+                #folder=f'postify/posts/{post.id}'
+            #)
+
+    if files: 
         for file in files:
+
+            if isinstance(file, str) or not hasattr(file, "filename") or not file.filename:
+                continue
+                
             cloud_res = cloudinary_service.upload_image(
                 file,
                 folder=f'postify/posts/{post.id}'
             )
+
             image = Image(
                 url=cloud_res["url"],
                 public_id=cloud_res["public_id"],
@@ -88,7 +102,8 @@ async def create_post(
 
             session.add(image)
             images.append(image)
-    await session.commit()
+
+        await session.commit()
 
     return PostRead(
         id=post.id,
