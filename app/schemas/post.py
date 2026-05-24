@@ -1,6 +1,6 @@
 from datetime import datetime  
 import uuid
-from typing import Optional
+from typing import Optional, List, TYPE_CHECKING
 
 from sqlmodel import SQLModel
 
