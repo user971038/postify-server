@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
@@ -33,3 +33,11 @@ async def create_user(data: UserCreate, session: AsyncSession = Depends(get_sess
 async def get_posts_by_user(userId: uuid.UUID, session: AsyncSession = Depends(get_session)):
     res = await session.execute(select(Post).where(Post.user_id == userId))
     return res.scalars().all()
+
+@router.get('/{user_id}', response_model=UserRead)
+async def get_user_by_id(user_id: uuid.UUID, session: AsyncSession = Depends(get_session)):
+    result = await session.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
