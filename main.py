@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import posts, users
 from app.db.init_db import init_db
 
+# Añadiendo un comentario para que me deje hacer commit
+
 async def lifespan(app: FastAPI):
     await init_db()
     yield
