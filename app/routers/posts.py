@@ -125,25 +125,21 @@ async def update_post(
     data: PostUpdate, 
     session: AsyncSession = Depends(get_session)
 ):
-    # 1. Fetch the existing post
     result = await session.execute(select(Post).where(Post.id == post_id))
     post = result.scalar_one_or_none()
     
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     
-    # 2. Extract incoming data and ignore anything left as None
     update_data = data.model_dump(exclude_unset=True)
     
     for key, value in update_data.items():
         setattr(post, key, value)
         
-    # 3. Save changes
     session.add(post)
     await session.commit()
     await session.refresh(post)
     
-    # Fetch images and counts to satisfy the PostRead response model requirements
     image_result = await session.execute(select(Image).where(Image.post_id == post_id))
     images = image_result.scalars().all()
     
@@ -231,7 +227,7 @@ async def add_like(post_id: uuid.UUID, data: LikeCreate,  session: AsyncSession 
     
     return LikeRead(**like.model_dump())
         
-# CommentRead
+# CommentRead add_comment
 
 @router.post('/{post_id}/comments', response_model=CommentRead, status_code=201)
 async def add_comment(post_id: uuid.UUID, data:CommentCreate,  session: AsyncSession = Depends(get_session)): 
