@@ -9,6 +9,8 @@ async def lifespan(app: FastAPI):
     await init_db()
     yield
 
+# Notas
+
 app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
