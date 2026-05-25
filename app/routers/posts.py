@@ -10,7 +10,9 @@ from app.db.session import get_session
 from app.models.comment import Comment
 from app.models.image import Image
 from app.models.like import Like
+
 from app.models.post import Post
+from app.models.user import User
 
 from app.schemas.comment import CommentCreate, CommentRead
 from app.schemas.image import ImageRead
@@ -192,6 +194,19 @@ async def get_post_by_id(post_id: uuid.UUID,  session: AsyncSession = Depends(ge
 
     image_result = await session.execute(select(Image).where(Image.post_id == post_id))
     images = image_result.scalars().all()
+
+    # update to see id in comments as username
+    hydrated_comments = []
+    for comment in comments:
+        user_res = await session.execute(select(User).where(User.id == comment.user_id))
+        user_obj = user_res.scalar_one_or_none()
+        
+        username_string = user_obj.username if user_obj else "Usuario Eliminado"
+        
+        comment_dict = comment.model_dump()
+        comment_dict["username"] = username_string
+        
+        hydrated_comments.append(CommentRead(**comment_dict))
     
     return PostReadDetails(
         id=post_id,
@@ -200,7 +215,8 @@ async def get_post_by_id(post_id: uuid.UUID,  session: AsyncSession = Depends(ge
         created_at=post.created_at,
         images=[ImageRead(**img.model_dump()) for img in images],
         likes=[LikeRead(**like.model_dump()) for like in likes],
-        comments=[CommentRead(**comment.model_dump()) for comment in comments]
+        #comments=[CommentRead(**comment.model_dump()) for comment in comments]
+        comments=hydrated_comments
     )
 
 # LikeRead - add_like

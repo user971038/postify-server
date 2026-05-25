@@ -15,3 +15,4 @@ class CommentRead(SQLModel):
     user_id: uuid.UUID
     post_id: uuid.UUID
     created_at: datetime
+    username: str = "placeholder"
