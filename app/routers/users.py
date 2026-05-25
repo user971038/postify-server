@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +7,7 @@ from sqlmodel import select
 from app.db.session import get_session
 
 from app.models.user import User
-from app.schemas.user import UserCreate, UserRead
+from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 from app.models.post import Post
 from app.schemas.post import PostRead
@@ -97,4 +97,28 @@ async def get_user_by_username(username: str, session: AsyncSession = Depends(ge
     
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+# update_user_by_id
+@router.patch('/{user_id}', response_model=UserRead)
+async def update_user(
+    user_id: uuid.UUID, 
+    data: UserUpdate, 
+    session: AsyncSession = Depends(get_session)
+):
+    result = await session.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    update_data = data.model_dump(exclude_unset=True)
+    
+    for key, value in update_data.items():
+        setattr(user, key, value)
+        
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    
     return user
