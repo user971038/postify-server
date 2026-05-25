@@ -186,6 +186,10 @@ async def get_post_by_id(post_id: uuid.UUID,  session: AsyncSession = Depends(ge
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     
+    user_result = await session.execute(select(User).where(User.id == post.user_id))
+    post_author = user_result.scalar_one_or_none()
+    author_username = post_author.username if post_author else "Usuario Eliminado"
+
     like_result = await session.execute(select(Like).where(Like.post_id == post_id))
     likes = like_result.scalars().all()
     
@@ -200,12 +204,10 @@ async def get_post_by_id(post_id: uuid.UUID,  session: AsyncSession = Depends(ge
     for comment in comments:
         user_res = await session.execute(select(User).where(User.id == comment.user_id))
         user_obj = user_res.scalar_one_or_none()
-        
         username_string = user_obj.username if user_obj else "Usuario Eliminado"
         
         comment_dict = comment.model_dump()
         comment_dict["username"] = username_string
-        
         hydrated_comments.append(CommentRead(**comment_dict))
     
     return PostReadDetails(
@@ -216,7 +218,8 @@ async def get_post_by_id(post_id: uuid.UUID,  session: AsyncSession = Depends(ge
         images=[ImageRead(**img.model_dump()) for img in images],
         likes=[LikeRead(**like.model_dump()) for like in likes],
         #comments=[CommentRead(**comment.model_dump()) for comment in comments]
-        comments=hydrated_comments
+        comments=hydrated_comments,
+        username=author_username
     )
 
 # LikeRead - add_like

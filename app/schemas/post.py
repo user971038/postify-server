@@ -42,6 +42,7 @@ class PostReadDetails(PostRead): # tmb me da error
     images: List['ImageRead'] = []
     likes: List['LikeRead'] = []
     comments: List['CommentRead'] = []
+    username: str = "placeholder"
 
 from app.schemas.like import LikeRead
 from app.schemas.comment import CommentRead
