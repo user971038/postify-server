@@ -237,8 +237,12 @@ async def add_comment(post_id: uuid.UUID, data:CommentCreate,  session: AsyncSes
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    #comment = Comment(**data.model_dump())
-    comment = Comment(**data.model_dump(), post_id=post_id)
+    #comment = Comment(**data.model_dump(), post_id=post_id)
+    comment_data = data.model_dump()
+    comment_data["post_id"] = post_id
+    
+    comment = Comment(**comment_data)
+    
     session.add(comment)
     await session.commit()
     await session.refresh(comment)
